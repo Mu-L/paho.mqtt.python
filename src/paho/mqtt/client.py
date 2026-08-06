@@ -3891,6 +3891,11 @@ class Client:
                 reason = ReasonCode(CONNACK >> 4, identifier=result)
                 properties = Properties(CONNACK >> 4)
                 properties.unpack(self._in_packet['packet'][2:])
+                if hasattr(properties, "ServerKeepAlive"):
+                    # MQTT 5.0: when the server returns a Server Keep Alive in
+                    # CONNACK, the client must use that value instead of the one
+                    # it sent (MQTT 5.0 spec 3.2.2.3.14).
+                    self._keepalive = properties.ServerKeepAlive
         else:
             (flags, result) = struct.unpack("!BB", self._in_packet['packet'])
             reason = convert_connack_rc_to_reason_code(result)
